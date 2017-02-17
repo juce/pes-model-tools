@@ -31,7 +31,8 @@ partname=['export']
 main_list=["EXPORT"]
 TEMPPATH = bpy.app[4].split('blender.exe')[0]+'pes_temp\\'
 parentlist = [("","","")]
-e_texlist,k=[],112
+#e_texlist,k=[],112
+e_texlist,k=[],112+196
 ob_id = 'EXPORT'
 
 def uv_key(uv):
@@ -167,8 +168,10 @@ def load_objs():
     def model_header(parent):  # MODEL DATA HEADER
 
         s_hdr=open(TEMPPATH+"unzlib_data","wb")
-        hdr_file=open(TEMPPATH+"extras14.dll","rb")
-        data1,data2,data3=hdr_file.read(112),hdr_file.read(80),hdr_file.read(132)
+        #hdr_file=open(TEMPPATH+"extras14.dll","rb")
+        hdr_file=open(TEMPPATH+"newextras.bin","rb")
+        #data1,data2,data3=hdr_file.read(112),hdr_file.read(80),hdr_file.read(132)
+        data1,data2,data3=hdr_file.read(k),hdr_file.read(80),hdr_file.read(132)
         data4,data5,data6=hdr_file.read(40),hdr_file.read(24),hdr_file.read(28)
         data7,data8,data9=hdr_file.read(60),hdr_file.read(28),hdr_file.read(68)
         dat10,dat11=hdr_file.read(172),hdr_file.read(192)
@@ -180,7 +183,8 @@ def load_objs():
         s_hdr.write(pack("3I",12,spc,20))
         for i in range(spc):
             s_hdr.write(pack("5I",1,255,255,0,255))
-        s_hdr.write(pack("2I",0,0))
+        #s_hdr.write(pack("2I",0,0))
+        s_hdr.write(pack("I",0))
         hdr_offs.append(s_hdr.tell())
         for i in range(spc):
             s_hdr.write(data2)
@@ -189,15 +193,17 @@ def load_objs():
         hdr_offs.append(s_hdr.tell())
         for i in range(spc):
             hdr_offs2.append(s_hdr.tell())
-            s_hdr.write(dat10)
+            s_hdr.write(dat11) #(dat10) - was
 
-        s_hdr.seek(124,0)
+        #s_hdr.seek(124,0)
+        s_hdr.seek(k+12,0)
         off1,off2=hdr_offs[0]-k,hdr_offs[1]-k
 
         for i in range(spc):
             o1=off1+(80*i)
             o2=off2
-            kkk=136
+            #kkk=136
+            kkk=136+20
 
             if i != 0:
                 o1=o1+4
@@ -237,6 +243,7 @@ def load_objs():
             s_hdr.write(pack("5I",p1_off+part_data[i][10],16,5,part_data[i][6],0))
             s_hdr.write(pack("5I",p1_off+part_data[i][11],15,5,part_data[i][6],0))
             s_hdr.write(pack("5I",p1_off+part_data[i][1],7,4,part_data[i][6],0))
+            s_hdr.write(pack("5I",p1_off+part_data[i][12],18,8,part_data[i][6],0))
             s_hdr.seek(12,1)
             s_hdr.write(pack("6I",p1_off+part_data[i][3],1,1,part_data[i][7]*3,0,p1_off+part_data[i][4]))
 
@@ -254,28 +261,38 @@ def load_objs():
         for i in range(spc):
             s_hdr.write(data5)
         m2_off=s_hdr.tell()
-        for i in range(spc):
-            s_hdr.write(pack("3I",12,0,4))
+        ####for i in range(spc):
+        ####    s_hdr.write(pack("3I",12,0,4))
+        s_hdr.write(pack("4I",12,1,4,0xfff8d234)) #IMPORTANT
+        s_hdr.write(pack("4I",12,1,4,0xfff8d250))
+        s_hdr.write(pack("4I",12,1,4,0xfff8d26c))
         m222_off=s_hdr.tell()
         for i in range(spc):
             s_hdr.write(data6)
         m2222_off=s_hdr.tell()
         for i in range(spc):
-            s_hdr.write(data7)
+            #s_hdr.write(data7)
+            s_hdr.write(pack("3I",12,0,4))  #test
         m33_off=s_hdr.tell()
-        s_hdr.write(pack("6I",12,0,4,12,spc,4))
+
+        #s_hdr.write(pack("6I",12,0,4,12,spc,4))
+        s_hdr.write(pack("4I",12,1,4,16))
+        s_hdr.write(pack("7sB","sk_prop".encode(),0))
+        s_hdr.write(pack("3I",12,spc,4))
+
         m22_off=s_hdr.tell()
         m3_off = 12+(spc*4)
         for i in range(spc):
             if i == 0:
                 s_hdr.write(pack("I",m3_off))
             else:
-                m3_off += part_data[i-1][12]
+                m3_off += part_data[i-1][13]
                 s_hdr.write(pack("I",m3_off))
         for i in range(spc):
             nsize=str(len(part_data[i][8]))+'sB'
             s_hdr.write(pack(nsize,part_data[i][8].encode(),0))
-        s_hdr.write(pack("H",0))
+        #s_hdr.write(pack("H",0))  #test
+        s_hdr.write(pack("I",0))  #test
         m44_off=s_hdr.tell()
         s_hdr.write(pack("3I",0,0,4))
         m4_off=s_hdr.tell()
@@ -286,17 +303,23 @@ def load_objs():
         s_hdr.write(pack("8f",min(bsize1_x),min(bsize1_y),min(bsize1_z),0,max(bsize2_x),max(bsize2_y),max(bsize2_z),0))
 
         s_hdr.seek(m1_off+12,0)
-        a1=0xFFFFFFFF-(m1_off-125)
+        #a1=0xFFFFFFFF-(m1_off-125)
+        a1=0xFFFFFFFF-(m1_off-(k+13))
+        print("==> a1=%x" % a1)
         for i in range(spc):
             a2=a1+(i*20)
-            a3=(m2_off-m1_off)+(i*12)
+            ####a3=(m2_off-m1_off)+(i*12)
+            a3=(m2_off-m1_off)+(i*16) #IMPORTANT
             a4=(m22_off-m1_off)+(i*4)
             a5=(m222_off-m1_off)+(i*28)
-            a6=(m2222_off-m1_off)+(i*60)
+            #a6=(m2222_off-m1_off)+(i*60)
+            a6=(m2222_off-m1_off)+(i*12)
             s_hdr.write(pack("6I",a2,a3,a5,a4,0,a6))
+            print("==> a2=%x, a3=%x, a5=%x, a4=%x, 0, a6=%x" % (a2,a3,a5,a4,a6))
 
         s_hdr.seek(44,0)
-        s_hdr.write(pack("9I",h1off,h2off,m1_off-24,m33_off-24,m33_off-12,m5_off-24,m44_off-24,m4_off-24,m44_off))
+        #s_hdr.write(pack("9I",h1off,h2off,m1_off-24,m33_off-24,m33_off-12,m5_off-24,m44_off-24,m4_off-24,m44_off))
+        s_hdr.write(pack("9I",h1off,h2off,m1_off-24,m33_off-24,m33_off,m5_off-24,m44_off-24,m4_off-24,m44_off))
 
         s_hdr.close()
         hdr_file.close()
@@ -357,6 +380,11 @@ def load_objs():
             u1,v1=uvlist[w][0][0],uvlist[w][0][1]
             file.write(pack("2f",u1,1-v1))
 
+        # d=0x12, f=0x8
+        zero_off=file.tell()
+
+        for _ in range(len(vlist)):
+            file.write(pack("i",0))
 
         toff=file.tell()
 
@@ -367,7 +395,7 @@ def load_objs():
 
         obname=obj.name
 
-        part_data.append((voff,uv1off,uv2off,toff,off1,bsize,len(vlist),len(flist),obname,nor_off,binor_off,tan_off,len(obj.name)+1)) #last index [12]
+        part_data.append((voff,uv1off,uv2off,toff,off1,bsize,len(vlist),len(flist),obname,nor_off,binor_off,tan_off,zero_off,len(obj.name)+1)) #last index [13]
 
         return 1
 
@@ -409,7 +437,8 @@ def load_objs():
                 out.flush()
                 out.close()
 
-    os.remove(TEMPPATH+'unzlib_data')
+    if os.path.exists(TEMPPATH+'unzlib_data'):
+        os.remove(TEMPPATH+'unzlib_data')
 
     if bpy.ops.object.mode_set():
     	bpy.ops.object.mode_set(mode='OBJECT')

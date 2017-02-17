@@ -219,12 +219,14 @@ def pes14_imp(self,context,model):
     k+=24
     file.seek(k,0)
     
-    zz,spc=unpack("2I",file.read(8))
+    zz,spc,_len=unpack("3I",file.read(12))
     
     for r in range(spc):
-        x1,x2,x3,x4,x5=unpack("5I",file.read(20))
-        offlist1.append(x3)
-        offlist2.append(x4)
+        _,x2,x3,_,_=unpack("5I",file.read(20))
+        offlist1.append(x2)
+        offlist2.append(x3)
+        print("offlist1: added: %x" % x2)
+        print("offlist2: added: %x" % x3)
         
     m=0
     for q in range(spc):
@@ -234,14 +236,18 @@ def pes14_imp(self,context,model):
         vert_elements,d,f,r= unpack("4I",file.read(16))
         for e in range(vert_elements):
             offset,d,f,vc,r=unpack("5I",file.read(20))
+            print("offset=%x, d=%x, f=%x, vc=%x, r=%x" % (offset,d,f,vc,r))
             if d == 2 and f == 5:
                 voff=offset
                 v_count=vc
+                print("==> voff=%x, v_count=%x" % (voff,v_count))
             elif d == 7 and f == 4:
                 uvoff=offset     
+                print("==> uvoff=%x" % uvoff)
         
         file.seek(offlist2[q]+12+k,0)
         toff,d,f,t_count=unpack("4I",file.read(16))
+        print("toff=%x, t_count=%x" % (toff, t_count))
         
         vlist,uvlist,flist=[],[],[]
          
