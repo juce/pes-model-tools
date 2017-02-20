@@ -32,7 +32,7 @@ main_list=["EXPORT"]
 TEMPPATH = bpy.app[4].split('blender.exe')[0]+'pes_temp\\'
 parentlist = [("","","")]
 #e_texlist,k=[],112
-e_texlist,k=[],112+196
+e_texlist=[]
 ob_id = 'EXPORT'
 
 def uv_key(uv):
@@ -169,16 +169,45 @@ def load_objs():
 
         s_hdr=open(TEMPPATH+"unzlib_data","wb")
         #hdr_file=open(TEMPPATH+"extras14.dll","rb")
-        hdr_file=open(TEMPPATH+"newextras.bin","rb")
-        #data1,data2,data3=hdr_file.read(112),hdr_file.read(80),hdr_file.read(132)
-        data1,data2,data3=hdr_file.read(k),hdr_file.read(80),hdr_file.read(132)
+        hdr_file=open(TEMPPATH+"extras14.bin","rb")
+        data1,data2,data3=hdr_file.read(112),hdr_file.read(80),hdr_file.read(132)
         data4,data5,data6=hdr_file.read(40),hdr_file.read(24),hdr_file.read(28)
         data7,data8,data9=hdr_file.read(60),hdr_file.read(28),hdr_file.read(68)
         dat10,dat11=hdr_file.read(172),hdr_file.read(192)
 
-        s_hdr.write(data1)
+        s_hdr.write(data1[:0x50])
         sublist=[ch_ob for ch_ob in parent.children if ch_ob.hide == 0]
         spc=len(sublist)
+
+        # write orientation info
+        s_hdr.write(pack("3I",12,spc+1,4))
+        for i in range(spc+1):
+            s_hdr.write(pack("I",12+(spc+1)*4+i*0x1c))
+
+        matrix_size = 4*(4*3)
+        oi_offs = [(spc+1)*0x1c+4]
+        for i in range(1,spc+1):
+            oi_offs.append((spc+1-i)*0x1c+4+matrix_size+(i-1)*0x10)
+
+        s_hdr.write(pack("7I",0x10,1,12,2,oi_offs[0],7,1))
+        for i in range(1,spc+1):
+            s_hdr.write(pack("7I",0x10,1,12,2,oi_offs[i],1,1))
+
+        s_hdr.write(pack("I",0))
+        # scale and translation matrix
+        s_hdr.write(pack("4f",1.0,0.0,0.0,0.0))
+        s_hdr.write(pack("4f",0.0,1.0,0.0,0.0))
+        s_hdr.write(pack("4f",0.0,0.0,1.0,0.0))
+
+        for i in range(spc*4-3):
+            s_hdr.write(pack("I",0))
+
+        # done with orientation info
+        k = s_hdr.tell()
+        s_hdr.seek(0x28,0)
+        s_hdr.write(pack("I",k-0x18))
+        s_hdr.seek(k,0)
+
         hdr_offs,hdr_offs2=[],[]
         s_hdr.write(pack("3I",12,spc,20))
         for i in range(spc):
@@ -261,11 +290,9 @@ def load_objs():
         for i in range(spc):
             s_hdr.write(data5)
         m2_off=s_hdr.tell()
-        ####for i in range(spc):
-        ####    s_hdr.write(pack("3I",12,0,4))
-        s_hdr.write(pack("4I",12,1,4,0xfff8d234)) #IMPORTANT
-        s_hdr.write(pack("4I",12,1,4,0xfff8d250))
-        s_hdr.write(pack("4I",12,1,4,0xfff8d26c))
+        for i in range(spc):
+            place = 0x50+12+(spc+1)*4+(i+1)*0x1c
+            s_hdr.write(pack("4I",12,1,4, 0xffffffff - m1_off + place + 1))
         m222_off=s_hdr.tell()
         for i in range(spc):
             s_hdr.write(data6)
