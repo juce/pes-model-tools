@@ -1,1 +1,5 @@
 *~
+*.model
+*.exe
+*.obj
+setenv.cmd
