@@ -1,7 +1,7 @@
 bl_info = {
     "name": "PES .model Importer / Mod Tool",
-    "author": "appul",
-    "version": (0,9),
+    "author": "sxsxsx, appul",
+    "version": (0, 9),
     "blender": (2, 6, 7),
     "api": 35853,
     "location": "Properties > Scene tab",
