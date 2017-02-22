@@ -16,20 +16,28 @@ from bpy.props import *
 from math import *
 from mathutils import *
 from struct import *
-from ctypes import windll
+import os.path
+
+try:
+    from ctypes import windll
+    has_windll = True
+except:
+    has_windll = False
 
 try:
     input = raw_input
 except:
     pass
-STD_OUTPUT_HANDLE = -11
-stdout_handle = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+
+if has_windll:
+    STD_OUTPUT_HANDLE = -11
+    stdout_handle = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
 
 part_list=["EXPORT"]
 obname=['export']
 partname=['export']
 main_list=["EXPORT"]
-TEMPPATH = bpy.app[4].split('blender.exe')[0]+'pes_temp\\'
+TEMPPATH = os.path.dirname(bpy.app[4]) + os.path.sep + 'pes_temp' + os.path.sep
 parentlist = [("","","")]
 #e_texlist,k=[],112
 e_texlist=[]
@@ -161,9 +169,11 @@ def load_objs():
     bpy.ops.object.select_all(action='DESELECT')
 
     print("")
-    windll.kernel32.SetConsoleTextAttribute(stdout_handle, 10)
+    if has_windll:
+        windll.kernel32.SetConsoleTextAttribute(stdout_handle, 10)
     print("Starting 3D Model Exporting...")
-    windll.kernel32.SetConsoleTextAttribute(stdout_handle, 7)
+    if has_windll:
+        windll.kernel32.SetConsoleTextAttribute(stdout_handle, 7)
 
     def model_header(parent):  # MODEL DATA HEADER
 
