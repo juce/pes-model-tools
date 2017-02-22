@@ -15,12 +15,13 @@ import bpy,bmesh,zlib,os,struct
 from array import array
 from bpy.props import *
 from struct import *
+import os.path
 
 bpy.types.Scene.model_path2 = StringProperty(name="Model File",subtype='FILE_PATH',default="Select the .model file from here   --->")
 bpy.types.Scene.uv_sw2 = BoolProperty(name="", default=0)
 bpy.types.Scene.model_vc2 = IntProperty(name="", default=0)
 modelpath,model_id = "",""
-temp_folder = bpy.app[4].split('blender.exe')[0]+'pes_temp\\'
+temp_folder = os.path.dirname(bpy.app[4]) + os.path.sep + 'pes_temp' + os.path.sep
 model_temp = temp_folder+"model_unzlib_temp.bin"
 plist2,f_plist2,h_plist2,h_start2,f_start2,start2=[],[],[],0,0,0
 pes14_voff2,pes14f_voff2,pes14h_voff2=[],[],[]
@@ -148,7 +149,7 @@ def pes14_imp(self,context,model):
     global pes14_voff2,pes14f_voff2,pes14h_voff2
 
     filepath_imp=modelpath
-    dirpath=os.path.dirname(filepath_imp)+"\\"
+    dirpath=os.path.dirname(filepath_imp)+os.path.sep
     obname='Model'
     temp=model_temp
     texname="model_tex"
