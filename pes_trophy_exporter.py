@@ -1,11 +1,11 @@
 bl_info = {
-    "name": "PES .model Exporter",
+    "name": "PES Trophy .model Exporter",
     "author": "sxsxsx, appul, juce",
     "version": (0, 9, 1),
     "blender": (2, 6, 7),
     "api": 35853,
     "location": "Properties > Scene tab",
-    "description": "Converts 3D mesh models into PES .model files",
+    "description": "Converts 3D mesh models into PES Trophy .model files",
     "warning": "",
     "wiki_url": "https://implyingrigged.info/wiki/Blender",
     "tracker_url": "",
