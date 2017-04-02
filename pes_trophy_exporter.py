@@ -488,7 +488,7 @@ def load_objs():
     bpy.ops.object.select_all(action='DESELECT')
 
 class OBJECTModelExporter(bpy.types.Panel):
-    bl_label = "PES .model Exporter"
+    bl_label = "PES Trophy .model Exporter"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "scene"
