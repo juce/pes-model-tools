@@ -1,0 +1,22 @@
+This is a modified PES exporter script for Blender to work with trophy models for PES 2017
+
+There is also a small additional tool: modmatrix.c - it allows to tell the game how to
+translate/resize the trophy for the animation scene, when the captain lifts the trophy
+into the air.
+
+
+CREDIT:
+PES exporter script for Blender was originally written by Suat CAGDAS (sxsxsx).
+It was enhanced and modified by appul, according to the information in the source code.
+
+See detailed documentation here on how to use these Blender scripts:
+https://implyingrigged.info/wiki/RigEx
+
+
+My modification for PES exporter was only to fix the orientation problem with PES 2017 trophies.
+I do not know if it works for other types of models, so i renamed it as "pes_trophy_exporter.py".
+
+The modmatrix tool can be compiled with any C-compiler
+On Windows: cl modmatrix.c
+On Unix/Linux: gcc -o modmatrix modmatrix.c
+
